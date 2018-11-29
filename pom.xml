@@ -1,12 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.flf.jibdocker</groupId>
-    <artifactId>jibdockertest</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    <name>jibdockertest</name>
+	<groupId>org.flf.jibdocker</groupId>
+	<artifactId>jibdockertest</artifactId>
+	<version>0.0.2-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>jibdockertest</name>
 
- 
+	<properties>
+		<dockerfile-maven-version>1.4.9</dockerfile-maven-version>
+	</properties>
+
+	<build>
+		<plugins>
+			<!-- https://github.com/spotify/dockerfile-maven -->
+			<!-- plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>${dockerfile-maven-version}</version>
+				<executions>
+					<execution>
+						<id>default</id>
+						<goals>
+							<goal>build</goal>
+							<goal>push</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<repository>registry.hub.docker.com/flefevre/licia</repository>
+					<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+					<tag>${project.version}</tag>
+					<buildArgs>
+						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+					</buildArgs>
+				</configuration>
+			</plugin-->
+
+			<!-- https://codefresh.io/howtos/using-docker-maven-maven-docker/ -->
+			<!-- mvn verify -->
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.26.0</version>
+				<executions>
+					<execution>
+						<id>start</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>build</goal>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+
+
+				<configuration>
+					<images>
+						<image>
+							<name>registry.hub.docker.com/flefevre/licia</name>
+							<build>
+								<dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
+							</build>
+							<run>
+								<ports>
+									<port>8080:8080</port>
+								</ports>
+								<wait>
+									<url>http://localhost:8080/</url>
+									<time>120000</time>
+								</wait>
+							</run>
+						</image>
+
+					</images>
+				</configuration>
+			</plugin>
+
+
+		</plugins>
+	</build>
 </project>

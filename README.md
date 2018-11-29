@@ -1,41 +1,61 @@
-docker build . -t dwethereumexplorer
-docker run --name dwethereumexplorer --rm -it -p 8000:8000 dwethereumexplorer:latest
-docker tag dwethereumexplorer:latest localhost:5000/dwethereumexplorer:latest
-docker push localhost:5000/dwethereumexplorer:latest
+#Minimal example to play with Maven and Docker
 
-# EthExplorer (In Progress)
+##3 maven plugins
 
-![EthExplorer Screenshot](http://i.imgur.com/NHFYq0x.png)
+https://medium.com/containers-101/using-docker-from-maven-and-maven-from-docker-1494238f1cf6
 
-## License
+###jib-maven-plugin
 
-GPL (see LICENSE)
+###docker-maven-plugin
 
-## Installation
+http://dmp.fabric8.io/docker-maven-plugin.pdf
 
-Install [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git "Git installation") if you haven't already
+###dockerfile-maven-plugin
 
-Clone the repo
+do not use https://github.com/spotify/docker-maven-plugin
+but use https://github.com/spotify/dockerfile-maven
+usage: https://github.com/spotify/dockerfile-maven/blob/master/docs/usage.md
 
-`git clone https://github.com/etherparty/explorer`
 
-Download [Nodejs and npm](https://docs.npmjs.com/getting-started/installing-node "Nodejs install") if you don't have them
+<!-- https://github.com/spotify/dockerfile-maven/pull/89 -->
+					<!-- dockerDirectory>src/main/docker</dockerDirectory -->
+					
 
-Start the program. All dependencies will be automatically downloaded
+Adding the configuration to deploy
+<configuration>
+		<repository>registry.hub.docker.com/flefevre/test</repository>
+		<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+		<tag>${project.version}</tag>
+		<buildArgs>
+			<JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+		</buildArgs>
+</configuration>
 
-`npm start`
+##Basic commands
 
-Then visit http://localhost:8000 in your browser of choice. You might get an error message:
+- mvn dockerfile:build
+- mvn dockerfile:tag
+- mvn dockerfile:push
 
-`geth --rpc --rpccorsdomain "http://localhost:8000"`
+then have a look to https://hub.docker.com/r/flefevre/test/
 
-Install [geth](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum "Geth install") if you don't already have it, then run the above command.
+##Authentification
 
-Then refresh the page in your browser
+mvn --encrypt-master-password
 
-## Docker
+vi ~/.m2/settings-security.xml
 
-If you are using Docker, you can use this [Docker image from DockerHub](https://hub.docker.com/r/zulhfreelancer/ethereum_explorer/). See [Dockerfile](Dockerfile).
+<settingsSecurity>
+	<master>{ENCRYPPASSWORD=}</master>
+  </settingsSecurity>
 
-```
-$ docker run --name block_explorer --rm -it -p 8000:8000 zulhfreelancer/ethereum_explorer:latest 
+mvn --encrypt-password
+
+vi ~/.m2/settings.xml
+<servers>
+    <server>
+  <id>registry.hub.docker.com</id>
+  <username>LOGIN</username>
+  <password>{ENCRYPPASSWORD=}</password>
+</server>
+  </servers>
